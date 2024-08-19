@@ -10,7 +10,6 @@ Endpoints
 	•	Request Body:
 	•	Content-Type: application/json
 	•	Schema:
-```
 
 {
 "userName": "string",
@@ -18,14 +17,14 @@ Endpoints
 "balance": "number",
 "currency": "string"
 }
-
+```
 ```
 Description: This endpoint creates a new account
 
 	•	Response:
 	•	Status Code: 201 Created
 	•	Body:
-```
+
 
 {
 "id": "long",
@@ -36,3 +35,4 @@ Description: This endpoint creates a new account
 "createdDate": "string",
 "lastModifiedDate": "string"
 }
+```
