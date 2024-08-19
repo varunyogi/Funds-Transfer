@@ -5,7 +5,7 @@ Endpoints
 
 1. Create Account
 
-	•	Endpoint: /accounts
+	•	Endpoint: /funds/v1
 	•	Method: POST
 	•	Request Body:
 	•	Content-Type: application/json
@@ -18,6 +18,7 @@ Endpoints
 "currency": "string"
 }
 ```
+
 ```
 Description: This endpoint creates a new account
 
