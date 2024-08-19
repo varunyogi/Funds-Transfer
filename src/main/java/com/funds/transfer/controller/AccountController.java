@@ -1,7 +1,8 @@
 package com.funds.transfer.controller;
 
 import com.funds.transfer.entity.Account;
-import com.funds.transfer.repository.AccountRepository;
+import com.funds.transfer.model.AccountDto;
+import com.funds.transfer.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,34 +15,38 @@ import java.util.List;
 public class AccountController {
 
     @Autowired
-    private AccountRepository accountRepository;
+    private AccountService accountService;
 
-    public AccountController(AccountRepository accountRepository) {
-        this.accountRepository = accountRepository;
+    public AccountController(AccountService accountService) {
+        this.accountService = accountService;
     }
 
     @PostMapping
-    public ResponseEntity<Account> createAccount(@RequestBody Account account) {
-        return null;
+    public ResponseEntity<AccountDto> createAccount(@RequestBody AccountDto accountDto) {
+
+        AccountDto savedAccount = accountService.createAccount(accountDto);
+        return new ResponseEntity<>(savedAccount, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<Account>> getAllAccounts() {
-        return null;
+    public ResponseEntity<List<AccountDto>> getAllAccounts() {
+        List<AccountDto> accounts = accountService.getAllAccounts();
+        return new ResponseEntity<>(accounts, HttpStatus.CREATED);
     }
 
     @DeleteMapping
-    public void deleteAccount(){
+    public void deleteAccount() {
 
     }
+
     @PutMapping
-    public void createTransfer(){
-
-    }
-    @GetMapping
-    public void checkBalance(){
+    public void createTransfer() {
 
     }
 
+    @GetMapping("/balance")
+    public void checkBalance() {
+
+    }
 
 }
