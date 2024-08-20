@@ -1,6 +1,7 @@
 package com.funds.transfer.service.serviceImpl;
 
 import com.funds.transfer.entity.Account;
+import com.funds.transfer.exception.AccountNotFoundException;
 import com.funds.transfer.mapper.AccountMapper;
 import com.funds.transfer.model.AccountDto;
 import com.funds.transfer.repository.AccountRepository;
@@ -49,5 +50,10 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void checkBalance() {
 
+    }
+
+    public AccountDto findAccountById(int accountId) {
+        Account account = accountRepository.findById(accountId).orElseThrow(() -> new AccountNotFoundException("Account ID does not exist"));
+        return AccountMapper.mapToAccountDto(account);
     }
 }

@@ -17,4 +17,6 @@ public interface AccountService {
     public void createTransfer();
 
     public void checkBalance();
+
+    public AccountDto findAccountById(int accountId);
 }

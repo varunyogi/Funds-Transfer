@@ -4,6 +4,7 @@ import com.funds.transfer.entity.Transaction;
 import com.funds.transfer.mapper.TransactionMapper;
 import com.funds.transfer.model.TransactionDto;
 import com.funds.transfer.repository.TransactionRepository;
+import com.funds.transfer.service.AccountService;
 import com.funds.transfer.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,14 +16,21 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
     private TransactionRepository transactionRepository;
+    @Autowired
+    private AccountService accountService;
 
-    public TransactionServiceImpl(TransactionRepository transactionRepository) {
+    public TransactionServiceImpl(TransactionRepository transactionRepository, AccountService accountService) {
         this.transactionRepository = transactionRepository;
+        this.accountService = accountService;
     }
 
     @Override
     public TransactionDto createTransaction(TransactionDto transactionDto) {
+
+        accountService.findAccountById(transactionDto.getReceiver());
+        accountService.findAccountById(transactionDto.getSender());
         Transaction savedTransaction = transactionRepository.save(TransactionMapper.mapToTransaction(transactionDto));
+
         return TransactionMapper.mapToTransactionDto(savedTransaction);
     }
 
