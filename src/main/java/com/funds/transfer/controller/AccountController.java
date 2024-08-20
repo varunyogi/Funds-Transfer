@@ -21,30 +21,30 @@ public class AccountController {
         this.accountService = accountService;
     }
 
-    @PostMapping
+    @PostMapping("/accounts")
     public ResponseEntity<AccountDto> createAccount(@RequestBody AccountDto accountDto) {
 
         AccountDto savedAccount = accountService.createAccount(accountDto);
         return new ResponseEntity<>(savedAccount, HttpStatus.CREATED);
     }
 
-    @GetMapping
+    @GetMapping("/accounts")
     public ResponseEntity<List<AccountDto>> getAllAccounts() {
         List<AccountDto> accounts = accountService.getAllAccounts();
         return new ResponseEntity<>(accounts, HttpStatus.CREATED);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/accounts")
     public void deleteAccount() {
 
     }
 
-    @PutMapping
+    @PutMapping("/accounts")
     public void createTransfer() {
 
     }
 
-    @GetMapping("/balance")
+    @GetMapping("/accounts/balance")
     public void checkBalance() {
 
     }
