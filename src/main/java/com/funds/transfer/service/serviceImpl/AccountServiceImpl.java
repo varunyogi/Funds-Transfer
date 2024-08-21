@@ -65,4 +65,9 @@ public class AccountServiceImpl implements AccountService {
         Account account = accountRepository.findById(accountId).orElseThrow(() -> new AccountNotFoundException("Account ID does not exist"));
         return AccountMapper.mapToAccountDto(account);
     }
+
+    public AccountDto updateAccount(AccountDto accountDto) {
+        Account savedAccount = accountRepository.save(AccountMapper.mapToAccount(accountDto));
+        return AccountMapper.mapToAccountDto(savedAccount);
+    }
 }

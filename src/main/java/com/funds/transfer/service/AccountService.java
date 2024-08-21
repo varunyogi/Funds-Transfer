@@ -18,4 +18,6 @@ public interface AccountService {
     public AccountDto findAccountById(int accountId);
 
     public boolean isValidAccount(int accountId);
+
+    public AccountDto updateAccount(AccountDto accountDto);
 }

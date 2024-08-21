@@ -5,6 +5,7 @@ import com.funds.transfer.exception.AccountNotFoundException;
 import com.funds.transfer.exception.CurrencyNotSupportedException;
 import com.funds.transfer.exception.InsufficientAmountException;
 import com.funds.transfer.mapper.TransactionMapper;
+import com.funds.transfer.model.AccountDto;
 import com.funds.transfer.model.Currency;
 import com.funds.transfer.model.TransactionDto;
 import com.funds.transfer.repository.TransactionRepository;
@@ -55,6 +56,19 @@ public class TransactionServiceImpl implements TransactionService {
     public List<TransactionDto> getAllTransactions() {
         List<Transaction> transactions = transactionRepository.findAll();
         return transactions.stream().map(TransactionMapper::mapToTransactionDto).toList();
+    }
+
+    @Override
+    public AccountDto deposit(int accountId, double amount) {
+        AccountDto accountById = accountService.findAccountById(accountId);
+        accountById.setBalance(accountById.getBalance() + amount);
+        return accountService.updateAccount(accountById);
+
+    }
+
+    @Override
+    public AccountDto withdraw(int accountId, double amount) {
+        return null;
     }
 
     public boolean isValidCurrency(String currency) {
