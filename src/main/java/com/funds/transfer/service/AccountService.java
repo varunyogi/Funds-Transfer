@@ -13,8 +13,6 @@ public interface AccountService {
 
     public void deleteAccount();
 
-    public void createTransfer();
-
     public Map<String, String> checkBalance(int accountId);
 
     public AccountDto findAccountById(int accountId);

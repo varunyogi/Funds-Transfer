@@ -49,10 +49,6 @@ public class AccountServiceImpl implements AccountService {
 
     }
 
-    @Override
-    public void createTransfer() {
-
-    }
 
     @Override
     public Map<String, String> checkBalance(int accountId) {
