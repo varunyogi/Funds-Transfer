@@ -1,10 +1,9 @@
 package com.funds.transfer.service;
 
-import com.funds.transfer.entity.Account;
 import com.funds.transfer.model.AccountDto;
-import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Map;
 
 public interface AccountService {
 
@@ -16,7 +15,9 @@ public interface AccountService {
 
     public void createTransfer();
 
-    public void checkBalance();
+    public Map<String, String> checkBalance(int accountId);
 
     public AccountDto findAccountById(int accountId);
+
+    public boolean isValidAccount(int accountId);
 }

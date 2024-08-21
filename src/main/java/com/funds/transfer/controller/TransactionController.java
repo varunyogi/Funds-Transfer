@@ -22,14 +22,12 @@ public class TransactionController {
 
     @PostMapping("/transactions")
     public ResponseEntity<TransactionDto> createTransaction(@RequestBody TransactionDto transactionDto) {
-        TransactionDto transaction = transactionService.createTransaction(transactionDto);
-        return new ResponseEntity<>(transaction, HttpStatus.CREATED);
+        return new ResponseEntity<>(transactionService.createTransaction(transactionDto), HttpStatus.CREATED);
     }
 
     @GetMapping("/transactions")
     public ResponseEntity<List<TransactionDto>> getAllTransactions() {
-        List<TransactionDto> transactions = transactionService.getAllTransactions();
-        return new ResponseEntity<>(transactions, HttpStatus.OK);
+        return new ResponseEntity<>(transactionService.getAllTransactions(), HttpStatus.OK);
     }
 
 

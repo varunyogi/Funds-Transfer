@@ -1,6 +1,5 @@
 package com.funds.transfer.controller;
 
-import com.funds.transfer.entity.Account;
 import com.funds.transfer.model.AccountDto;
 import com.funds.transfer.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/funds/v1")
@@ -31,7 +31,7 @@ public class AccountController {
     @GetMapping("/accounts")
     public ResponseEntity<List<AccountDto>> getAllAccounts() {
         List<AccountDto> accounts = accountService.getAllAccounts();
-        return new ResponseEntity<>(accounts, HttpStatus.CREATED);
+        return new ResponseEntity<>(accounts, HttpStatus.OK);
     }
 
     @DeleteMapping("/accounts")
@@ -44,8 +44,10 @@ public class AccountController {
 
     }
 
-    @GetMapping("/accounts/balance")
-    public void checkBalance() {
+    @GetMapping("/accounts/balance/{accountId}")
+    public ResponseEntity<Map<String,String>> checkBalance(@PathVariable Integer accountId) {
+        Map<String,String> accountDetails=accountService.checkBalance(accountId);
+        return new ResponseEntity<>(accountDetails, HttpStatus.OK);
 
     }
 

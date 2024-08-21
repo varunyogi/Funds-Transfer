@@ -1,7 +1,11 @@
 package com.funds.transfer.service.serviceImpl;
 
 import com.funds.transfer.entity.Transaction;
+import com.funds.transfer.exception.AccountNotFoundException;
+import com.funds.transfer.exception.CurrencyNotSupportedException;
+import com.funds.transfer.exception.InsufficientAmountException;
 import com.funds.transfer.mapper.TransactionMapper;
+import com.funds.transfer.model.Currency;
 import com.funds.transfer.model.TransactionDto;
 import com.funds.transfer.repository.TransactionRepository;
 import com.funds.transfer.service.AccountService;
@@ -27,9 +31,22 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public TransactionDto createTransaction(TransactionDto transactionDto) {
 
-        accountService.findAccountById(transactionDto.getReceiver());
-        accountService.findAccountById(transactionDto.getSender());
-        Transaction savedTransaction = transactionRepository.save(TransactionMapper.mapToTransaction(transactionDto));
+        Transaction savedTransaction = null;
+
+        if (accountService.isValidAccount(transactionDto.getReceiver()) && accountService.isValidAccount(transactionDto.getSender())) {
+            if (Double.valueOf(accountService.checkBalance(transactionDto.getSender()).get("balance")) > transactionDto.getAmount()) {
+                if (isValidCurrency(transactionDto.getReceiverCurrency()) && isValidCurrency(transactionDto.getSenderCurrency())) {
+                    savedTransaction = transactionRepository.save(TransactionMapper.mapToTransaction(transactionDto));
+                } else {
+                    throw new CurrencyNotSupportedException("This currency is not supported by our platform");
+                }
+
+            } else {
+                throw new InsufficientAmountException("Your account does not have enough balance to make this transaction");
+            }
+        } else {
+            throw new AccountNotFoundException("Please provide a valid SENDER/RECEIVER account ID");
+        }
 
         return TransactionMapper.mapToTransactionDto(savedTransaction);
     }
@@ -38,5 +55,14 @@ public class TransactionServiceImpl implements TransactionService {
     public List<TransactionDto> getAllTransactions() {
         List<Transaction> transactions = transactionRepository.findAll();
         return transactions.stream().map(TransactionMapper::mapToTransactionDto).toList();
+    }
+
+    public boolean isValidCurrency(String currency) {
+        try {
+            Currency.valueOf(currency.toUpperCase());
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 }

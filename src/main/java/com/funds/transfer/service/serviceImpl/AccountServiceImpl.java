@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -37,6 +39,11 @@ public class AccountServiceImpl implements AccountService {
 
     }
 
+    public boolean isValidAccount(int accountId) {
+        List<Integer> accounts = getAllAccounts().stream().map(AccountDto::getUserID).toList();
+        return accounts.contains(accountId);
+    }
+
     @Override
     public void deleteAccount() {
 
@@ -48,7 +55,13 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void checkBalance() {
+    public Map<String, String> checkBalance(int accountId) {
+        AccountDto accountById = findAccountById(accountId);
+        Map<String, String> userDetails = new HashMap<>();
+        userDetails.put("balance", String.valueOf(accountById.getBalance()));
+        userDetails.put("username", accountById.getUserName());
+        userDetails.put("currency", accountById.getCurrency());
+        return userDetails;
 
     }
 
