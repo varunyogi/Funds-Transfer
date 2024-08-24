@@ -1,5 +1,6 @@
 package com.funds.transfer.service.serviceImpl;
 
+import com.funds.transfer.entity.CurrencyExchanger;
 import com.funds.transfer.feign.CurrencyExchangeRate;
 import com.funds.transfer.model.ExchangeRate;
 import com.funds.transfer.service.ExchangeRateService;
@@ -24,5 +25,10 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
     @Override
     public ExchangeRate getExchangeRateForPair(String baseCurrency, String targetCurrency) {
         return currencyExchangeRate.getExchangeRateForPair(baseCurrency, targetCurrency);
+    }
+
+    @Override
+    public CurrencyExchanger getExchangeRateAmountForPair(String baseCurrency, String targetCurrency, double amount) {
+        return currencyExchangeRate.getExchangeRateAmountForPair(baseCurrency, targetCurrency, amount);
     }
 }

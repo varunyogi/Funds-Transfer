@@ -1,5 +1,6 @@
 package com.funds.transfer.feign;
 
+import com.funds.transfer.entity.CurrencyExchanger;
 import com.funds.transfer.model.ExchangeRate;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,4 +15,8 @@ public interface CurrencyExchangeRate {
     @GetMapping("/pair/{baseCurrency}/{targetCurrency}")
     ExchangeRate getExchangeRateForPair(@PathVariable("baseCurrency") String baseCurrency,
                                         @PathVariable("targetCurrency") String targetCurrency);
+
+    @GetMapping("/pair/{baseCurrency}/{targetCurrency}/{amount}")
+    CurrencyExchanger getExchangeRateAmountForPair(@PathVariable("baseCurrency") String baseCurrency,
+                                                   @PathVariable("targetCurrency") String targetCurrency, @PathVariable("amount") double amount);
 }

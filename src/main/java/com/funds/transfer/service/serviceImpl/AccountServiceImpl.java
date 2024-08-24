@@ -77,4 +77,9 @@ public class AccountServiceImpl implements AccountService {
         Account savedAccount = accountRepository.save(AccountMapper.mapToAccount(accountDto));
         return AccountMapper.mapToAccountDto(savedAccount);
     }
+
+    public List<AccountDto> getAccountsByIds(List<Integer> accountIds) {
+         return accountRepository.findByIdIn(accountIds).stream().map(AccountMapper::mapToAccountDto).toList();
+
+    }
 }

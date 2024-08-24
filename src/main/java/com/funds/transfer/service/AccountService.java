@@ -1,5 +1,6 @@
 package com.funds.transfer.service;
 
+import com.funds.transfer.entity.Account;
 import com.funds.transfer.model.AccountDto;
 
 import java.util.List;
@@ -20,4 +21,6 @@ public interface AccountService {
     public boolean isValidAccount(int accountId);
 
     public AccountDto updateAccount(AccountDto accountDto);
+
+    public List<AccountDto> getAccountsByIds(List<Integer> accountIds);
 }

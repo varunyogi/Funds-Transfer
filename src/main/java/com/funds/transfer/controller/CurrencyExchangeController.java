@@ -1,5 +1,6 @@
 package com.funds.transfer.controller;
 
+import com.funds.transfer.entity.CurrencyExchanger;
 import com.funds.transfer.model.ExchangeRate;
 import com.funds.transfer.service.ExchangeRateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,13 @@ public class CurrencyExchangeController {
 
     @GetMapping("/pair/{baseCurrency}/{targetCurrency}")
     public ExchangeRate getExchangeRateForPair(@PathVariable String baseCurrency,
-                                                       @PathVariable String targetCurrency) {
+                                               @PathVariable String targetCurrency) {
         return exchangeRateService.getExchangeRateForPair(baseCurrency, targetCurrency);
+    }
+
+    @GetMapping("/pair/{baseCurrency}/{targetCurrency}/{amount}")
+    public CurrencyExchanger getExchangeRateAmountForPair(@PathVariable("baseCurrency") String baseCurrency,
+                                                          @PathVariable("targetCurrency") String targetCurrency, @PathVariable("amount") double amount) {
+        return exchangeRateService.getExchangeRateAmountForPair(baseCurrency, targetCurrency, amount);
     }
 }

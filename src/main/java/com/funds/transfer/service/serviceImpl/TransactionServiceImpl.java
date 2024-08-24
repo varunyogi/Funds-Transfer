@@ -1,31 +1,35 @@
 package com.funds.transfer.service.serviceImpl;
 
+import com.funds.transfer.entity.CurrencyExchanger;
 import com.funds.transfer.entity.Transaction;
 import com.funds.transfer.exception.AccountNotFoundException;
-import com.funds.transfer.exception.CurrencyNotSupportedException;
 import com.funds.transfer.exception.InsufficientAmountException;
 import com.funds.transfer.exception.TransactionTypeNotSupportedException;
 import com.funds.transfer.mapper.TransactionMapper;
 import com.funds.transfer.model.*;
 import com.funds.transfer.repository.TransactionRepository;
 import com.funds.transfer.service.AccountService;
+import com.funds.transfer.service.ExchangeRateService;
 import com.funds.transfer.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
 
-    @Autowired
-    private TransactionRepository transactionRepository;
-    @Autowired
-    private AccountService accountService;
 
-    public TransactionServiceImpl(TransactionRepository transactionRepository, AccountService accountService) {
+    private TransactionRepository transactionRepository;
+    private AccountService accountService;
+    private ExchangeRateService exchangeRateService;
+
+    @Autowired
+    public TransactionServiceImpl(TransactionRepository transactionRepository, AccountService accountService, ExchangeRateService exchangeRateService) {
         this.transactionRepository = transactionRepository;
         this.accountService = accountService;
+        this.exchangeRateService = exchangeRateService;
     }
 
     @Override
@@ -46,11 +50,11 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction savedTransaction = null;
         if (accountService.isValidAccount(transactionDto.getReceiver()) && accountService.isValidAccount(transactionDto.getSender())) {
             if (Double.valueOf(accountService.checkBalance(transactionDto.getSender()).get("balance")) > transactionDto.getAmount()) {
-                if (isValidCurrency(transactionDto.getReceiverCurrency()) && isValidCurrency(transactionDto.getSenderCurrency())) {
-                    savedTransaction = transactionRepository.save(TransactionMapper.mapToTransaction(transactionDto));
-                } else {
-                    throw new CurrencyNotSupportedException("This currency is not supported by our platform");
-                }
+                List<AccountDto> accountDtos = updateAccountForTransferTransaction(transactionDto);
+                transactionDto.setSenderCurrency(getCurrencyType(accountDtos, transactionDto, 'S'));
+                transactionDto.setReceiverCurrency(getCurrencyType(accountDtos, transactionDto, 'R'));
+                transactionDto.setTransactionStatus(TxStatus.COMPLETED);
+                savedTransaction = transactionRepository.save(TransactionMapper.mapToTransaction(transactionDto));
 
             } else {
                 throw new InsufficientAmountException("Your account does not have enough balance to make this transaction");
@@ -61,6 +65,39 @@ public class TransactionServiceImpl implements TransactionService {
 
         return TransactionMapper.mapToTransactionDto(savedTransaction);
     }
+
+    private String getCurrencyType(List<AccountDto> accountDtoList, TransactionDto transactionDto, char type) {
+        if (type == 'R') {
+            return accountDtoList.stream().filter(accountDto -> accountDto.getUserID() == transactionDto.getReceiver()).findFirst().orElse(null).getCurrency();
+        } else {
+            return accountDtoList.stream().filter(accountDto -> accountDto.getUserID() == transactionDto.getSender()).findFirst().orElse(null).getCurrency();
+        }
+
+    }
+
+
+    public List<AccountDto> updateAccountForTransferTransaction(TransactionDto transactionDto) {
+        List<AccountDto> accountsByIds = accountService.getAccountsByIds(Arrays.asList(transactionDto.getSender(), transactionDto.getReceiver()));
+        AccountDto senderAccount = accountsByIds.stream().filter(accountDto -> accountDto.getUserID() == transactionDto.getSender()).findFirst().orElse(null);
+        AccountDto receiverAccount = accountsByIds.stream().filter(accountDto -> accountDto.getUserID() == transactionDto.getReceiver()).findFirst().orElse(null);
+
+        CurrencyExchanger exchangeRateAmountForPair = exchangeRateService.getExchangeRateAmountForPair
+                (senderAccount.getCurrency(), receiverAccount.getCurrency(), transactionDto.getAmount());
+        for (AccountDto accountDto : accountsByIds) {
+            if (transactionDto.getSender() == accountDto.getUserID()) {
+                accountDto.setBalance(accountDto.getBalance() - transactionDto.getAmount());
+                accountService.updateAccount(accountDto);
+            } else if (transactionDto.getReceiver() == accountDto.getUserID()) {
+                accountDto.setBalance(accountDto.getBalance() + exchangeRateAmountForPair.getConversion_result());
+                accountService.updateAccount(accountDto);
+            }
+        }
+
+        return accountsByIds;
+
+
+    }
+
 
     @Override
     public List<TransactionDto> getAllTransactions() {
