@@ -26,6 +26,12 @@ public class GlobalExceptionHandlers {
             apiException = new APIException(errorMessage, HttpStatus.BAD_REQUEST, ZonedDateTime.now(ZoneId.of("Z")));
 
             return new ResponseEntity<>(apiException, HttpStatus.BAD_REQUEST);
+        } else if (ex.getMessage().contains("[TRANSFER, WITHDRAWAL, DEPOSIT]")) {
+            String errorMessage = "Our Application only supports transaction types as WITHDRAWAL,DEPOSIT or TRANSFER";
+            apiException = new APIException(errorMessage, HttpStatus.BAD_REQUEST, ZonedDateTime.now(ZoneId.of("Z")));
+
+            return new ResponseEntity<>(apiException, HttpStatus.BAD_REQUEST);
+
         } else {
             apiException = new APIException(ex.getMessage(), HttpStatus.BAD_REQUEST, ZonedDateTime.now(ZoneId.of("Z")));
             return new ResponseEntity<>(apiException, HttpStatus.BAD_REQUEST);

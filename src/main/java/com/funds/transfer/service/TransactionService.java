@@ -11,7 +11,7 @@ public interface TransactionService {
 
     public List<TransactionDto> getAllTransactions();
 
-    public AccountDto deposit(int accountId, double amount);
+    public TransactionDto deposit(int accountId, double amount);
 
-    public AccountDto withdraw(int accountId, double amount);
+    public TransactionDto withdraw(int accountId, double amount);
 }
