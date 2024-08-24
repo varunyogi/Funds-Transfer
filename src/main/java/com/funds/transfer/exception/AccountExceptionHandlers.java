@@ -18,4 +18,12 @@ public class AccountExceptionHandlers {
         );
         return new ResponseEntity<>(apiException, apiException.getHttpStatus());
     }
+
+    @ExceptionHandler(value = AccountTypeNotSupportedException.class)
+    public ResponseEntity<Object> accountTypeNotSupportedException(AccountTypeNotSupportedException e) {
+        APIException apiException = new APIException(
+                e.getMessage(), HttpStatus.BAD_REQUEST, ZonedDateTime.now(ZoneId.of("Z"))
+        );
+        return new ResponseEntity<>(apiException, apiException.getHttpStatus());
+    }
 }

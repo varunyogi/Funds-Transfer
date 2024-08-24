@@ -2,6 +2,7 @@ package com.funds.transfer.controller;
 
 import com.funds.transfer.model.AccountDto;
 import com.funds.transfer.service.AccountService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ public class AccountController {
     }
 
     @PostMapping("/accounts")
-    public ResponseEntity<AccountDto> createAccount(@RequestBody AccountDto accountDto) {
+    public ResponseEntity<AccountDto> createAccount(@Valid @RequestBody AccountDto accountDto) {
 
         AccountDto savedAccount = accountService.createAccount(accountDto);
         return new ResponseEntity<>(savedAccount, HttpStatus.CREATED);

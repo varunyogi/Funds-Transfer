@@ -2,8 +2,10 @@ package com.funds.transfer.service.serviceImpl;
 
 import com.funds.transfer.entity.Account;
 import com.funds.transfer.exception.AccountNotFoundException;
+import com.funds.transfer.exception.AccountTypeNotSupportedException;
 import com.funds.transfer.mapper.AccountMapper;
 import com.funds.transfer.model.AccountDto;
+import com.funds.transfer.model.AccountType;
 import com.funds.transfer.repository.AccountRepository;
 import com.funds.transfer.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +29,13 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional
     public AccountDto createAccount(AccountDto accountDto) {
-        Account savedAccount = accountRepository.save(AccountMapper.mapToAccount(accountDto));
-        return AccountMapper.mapToAccountDto(savedAccount);
+        if (accountDto.getAccountType().equals(AccountType.CREDIT) || accountDto.getAccountType().equals(AccountType.DEBIT)) {
+            Account savedAccount = accountRepository.save(AccountMapper.mapToAccount(accountDto));
+            return AccountMapper.mapToAccountDto(savedAccount);
+        } else {
+            throw new AccountTypeNotSupportedException("Our Application only supports account type as CREDIT or DEBIT");
+        }
+
     }
 
     @Override
