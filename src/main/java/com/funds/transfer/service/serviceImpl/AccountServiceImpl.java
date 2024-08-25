@@ -29,13 +29,16 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional
     public AccountDto createAccount(AccountDto accountDto) {
-        if (accountDto.getAccountType().equals(AccountType.CREDIT) || accountDto.getAccountType().equals(AccountType.DEBIT)) {
-            Account savedAccount = accountRepository.save(AccountMapper.mapToAccount(accountDto));
-            return AccountMapper.mapToAccountDto(savedAccount);
-        } else {
+        Account savedAccount = null;
+        try {
+            if (accountDto.getAccountType().equals(AccountType.CREDIT) || accountDto.getAccountType().equals(AccountType.DEBIT)) {
+                savedAccount = accountRepository.save(AccountMapper.mapToAccount(accountDto));
+
+            }
+        } catch (IllegalArgumentException e) {
             throw new AccountTypeNotSupportedException("Our Application only supports account type as CREDIT or DEBIT");
         }
-
+        return AccountMapper.mapToAccountDto(savedAccount);
     }
 
     @Override
@@ -68,6 +71,7 @@ public class AccountServiceImpl implements AccountService {
 
     }
 
+    @Transactional
     public AccountDto findAccountById(int accountId) {
         Account account = accountRepository.findById(accountId).orElseThrow(() -> new AccountNotFoundException("Account ID does not exist"));
         return AccountMapper.mapToAccountDto(account);
@@ -78,8 +82,9 @@ public class AccountServiceImpl implements AccountService {
         return AccountMapper.mapToAccountDto(savedAccount);
     }
 
+    @Transactional
     public List<AccountDto> getAccountsByIds(List<Integer> accountIds) {
-         return accountRepository.findByIdIn(accountIds).stream().map(AccountMapper::mapToAccountDto).toList();
+        return accountRepository.findByIdIn(accountIds).stream().map(AccountMapper::mapToAccountDto).toList();
 
     }
 }

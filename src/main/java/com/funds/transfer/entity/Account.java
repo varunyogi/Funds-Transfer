@@ -23,6 +23,8 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int accountId;
+    @Version
+    private Long version;
     private String accountName;
     private String currency;
     private double balance;

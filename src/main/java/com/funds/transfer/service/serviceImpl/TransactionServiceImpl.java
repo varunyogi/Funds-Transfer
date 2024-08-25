@@ -145,7 +145,6 @@ public class TransactionServiceImpl implements TransactionService {
                         amount(amount).
                         build();
 
-
                 savedTransaction = transactionRepository.save(transaction);
 
             }
