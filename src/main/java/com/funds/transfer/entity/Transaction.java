@@ -34,5 +34,4 @@ public class Transaction {
     private LocalDateTime transactionDate;
     private TxStatus status;
 
-
 }

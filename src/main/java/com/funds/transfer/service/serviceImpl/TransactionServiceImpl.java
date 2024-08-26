@@ -11,6 +11,8 @@ import com.funds.transfer.repository.TransactionRepository;
 import com.funds.transfer.service.AccountService;
 import com.funds.transfer.service.ExchangeRateService;
 import com.funds.transfer.service.TransactionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,7 @@ import java.util.List;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
+    private static final Logger logger = LoggerFactory.getLogger(TransactionServiceImpl.class);
 
 
     private TransactionRepository transactionRepository;
@@ -35,12 +38,16 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public TransactionDto createTransaction(TransactionDto transactionDto) {
         if (transactionDto.getTypeOfTransaction().equals(TypeOfTransaction.TRANSFER)) {
+            logger.info("Create Transaction with transaction type as TRANSFER");
             return makeTransaction(transactionDto);
         } else if (transactionDto.getTypeOfTransaction().equals(TypeOfTransaction.DEPOSIT)) {
+            logger.info("Create Transaction with transaction type as DEPOSIT");
             return deposit(transactionDto.getSender(), transactionDto.getAmount());
         } else if (transactionDto.getTypeOfTransaction().equals(TypeOfTransaction.WITHDRAWAL)) {
+            logger.info("Create Transaction with transaction type as WITHDRAWAL");
             return withdraw(transactionDto.getSender(), transactionDto.getAmount());
         } else {
+            logger.error("Invalid transaction type inserted by user " + transactionDto.getTypeOfTransaction());
             throw new TransactionTypeNotSupportedException("Our Application only supports account type as CREDIT or DEBIT");
         }
     }
@@ -54,12 +61,16 @@ public class TransactionServiceImpl implements TransactionService {
                 transactionDto.setSenderCurrency(getCurrencyType(accountDtos, transactionDto, 'S'));
                 transactionDto.setReceiverCurrency(getCurrencyType(accountDtos, transactionDto, 'R'));
                 transactionDto.setTransactionStatus(TxStatus.COMPLETED);
+                logger.info("Transaction object created, under process");
                 savedTransaction = transactionRepository.save(TransactionMapper.mapToTransaction(transactionDto));
+                logger.info("Transaction completed with transaction: " + savedTransaction);
 
             } else {
+                logger.error("user " + transactionDto.getSender() + " don't have sufficient balance in the account");
                 throw new InsufficientAmountException("Your account does not have enough balance to make this transaction");
             }
         } else {
+            logger.error("SENDER/RECEIVER ID provided is invalid, sender :" + transactionDto.getSender() + "receiver:" + transactionDto.getReceiver());
             throw new AccountNotFoundException("Please provide a valid SENDER/RECEIVER account ID");
         }
 
@@ -80,15 +91,18 @@ public class TransactionServiceImpl implements TransactionService {
         List<AccountDto> accountsByIds = accountService.getAccountsByIds(Arrays.asList(transactionDto.getSender(), transactionDto.getReceiver()));
         AccountDto senderAccount = accountsByIds.stream().filter(accountDto -> accountDto.getUserID() == transactionDto.getSender()).findFirst().orElse(null);
         AccountDto receiverAccount = accountsByIds.stream().filter(accountDto -> accountDto.getUserID() == transactionDto.getReceiver()).findFirst().orElse(null);
-
+        logger.info("Fetching current rates and amount to be transferred from Exchange RAte API");
         CurrencyExchanger exchangeRateAmountForPair = exchangeRateService.getExchangeRateAmountForPair
                 (senderAccount.getCurrency(), receiverAccount.getCurrency(), transactionDto.getAmount());
+        logger.info("Current Rates fetched:" + exchangeRateAmountForPair);
         for (AccountDto accountDto : accountsByIds) {
             if (transactionDto.getSender() == accountDto.getUserID()) {
                 accountDto.setBalance(accountDto.getBalance() - transactionDto.getAmount());
+                logger.info("updating sender account balance ");
                 accountService.updateAccount(accountDto);
             } else if (transactionDto.getReceiver() == accountDto.getUserID()) {
                 accountDto.setBalance(accountDto.getBalance() + exchangeRateAmountForPair.getConversion_result());
+                logger.info("updating receiver account balance ");
                 accountService.updateAccount(accountDto);
             }
         }
@@ -108,8 +122,16 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public TransactionDto deposit(int accountId, double amount) {
         Transaction savedTransaction = null;
-        AccountDto accountById = accountService.findAccountById(accountId);
-        accountById.setBalance(accountById.getBalance() + amount);
+        logger.info("Fetching account details with account ID " + accountId);
+        AccountDto accountById = null;
+        if (accountService.findAccountById(accountId) != null) {
+            accountById = accountService.findAccountById(accountId);
+            accountById.setBalance(accountById.getBalance() + amount);
+        } else {
+            logger.error("account not found with account ID " + accountId);
+            throw new AccountNotFoundException("Account not found");
+        }
+
         if (accountService.updateAccount(accountById) != null) {
             Transaction transaction = Transaction.builder().
                     fromCurrency(accountById.getCurrency()).
