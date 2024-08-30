@@ -2,3 +2,4 @@ com/funds/transfer/repository/TransactionRepositoryTest.class
 com/funds/transfer/repository/AccountRepositoryTest.class
 com/funds/transfer/service/AccountServiceImplTest.class
 com/funds/transfer/FundTransferApplicationTests.class
+com/funds/transfer/service/TransactionServiceImplTest.class

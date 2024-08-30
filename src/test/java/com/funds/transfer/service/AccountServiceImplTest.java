@@ -2,6 +2,7 @@ package com.funds.transfer.service;
 
 import com.funds.transfer.entity.Account;
 import com.funds.transfer.exception.AccountNotFoundException;
+import com.funds.transfer.exception.CurrencyNotSupportedException;
 import com.funds.transfer.mapper.AccountMapper;
 import com.funds.transfer.model.AccountDto;
 import com.funds.transfer.model.AccountType;
@@ -79,4 +80,14 @@ public class AccountServiceImplTest {
         assertThrows(AccountNotFoundException.class, () -> accountService.findAccountById(accountId));
         verify(accountRepository, times(1)).findById(accountId);
     }
+
+    @Test
+    public void CurrencyNotFoundDuringAccountCreation() {
+
+        AccountDto accountDto = AccountDto.builder().userName("John").accountType(AccountType.CREDIT).balance(200).currency("U3D").build();
+        assertThrows(CurrencyNotSupportedException.class, () -> accountService.createAccount(accountDto));
+
+
+    }
+
 }

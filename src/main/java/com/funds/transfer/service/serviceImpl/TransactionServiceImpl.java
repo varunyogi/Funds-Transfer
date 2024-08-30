@@ -7,7 +7,10 @@ import com.funds.transfer.exception.InsufficientAmountException;
 import com.funds.transfer.exception.InvalidAmountException;
 import com.funds.transfer.exception.TransactionTypeNotSupportedException;
 import com.funds.transfer.mapper.TransactionMapper;
-import com.funds.transfer.model.*;
+import com.funds.transfer.model.AccountDto;
+import com.funds.transfer.model.TransactionDto;
+import com.funds.transfer.model.TxStatus;
+import com.funds.transfer.model.TypeOfTransaction;
 import com.funds.transfer.repository.TransactionRepository;
 import com.funds.transfer.service.AccountService;
 import com.funds.transfer.service.ExchangeRateService;
@@ -38,8 +41,10 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public TransactionDto createTransaction(TransactionDto transactionDto) {
-
-        if (transactionDto.getTypeOfTransaction().equals(TypeOfTransaction.TRANSFER)) {
+        if (null == transactionDto.getTypeOfTransaction()) {
+            logger.error("Invalid transaction type inserted by user " + transactionDto.getTypeOfTransaction());
+            throw new TransactionTypeNotSupportedException("Our Application only supports account type as TRANSFER or DEPOSIT or WITHDRAWAL");
+        } else if (transactionDto.getTypeOfTransaction().equals(TypeOfTransaction.TRANSFER)) {
             logger.info("Create Transaction with transaction type as TRANSFER");
             return makeTransaction(transactionDto);
         } else if (transactionDto.getTypeOfTransaction().equals(TypeOfTransaction.DEPOSIT)) {
@@ -50,7 +55,7 @@ public class TransactionServiceImpl implements TransactionService {
             return withdraw(transactionDto.getSender(), transactionDto.getAmount());
         } else {
             logger.error("Invalid transaction type inserted by user " + transactionDto.getTypeOfTransaction());
-            throw new TransactionTypeNotSupportedException("Our Application only supports account type as CREDIT or DEBIT");
+            throw new TransactionTypeNotSupportedException("Our Application only supports account type as TRANSFER or DEPOSIT or WITHDRAWAL");
         }
     }
 
