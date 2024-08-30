@@ -38,6 +38,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public TransactionDto createTransaction(TransactionDto transactionDto) {
+
         if (transactionDto.getTypeOfTransaction().equals(TypeOfTransaction.TRANSFER)) {
             logger.info("Create Transaction with transaction type as TRANSFER");
             return makeTransaction(transactionDto);
@@ -103,8 +104,7 @@ public class TransactionServiceImpl implements TransactionService {
         AccountDto senderAccount = accountsByIds.stream().filter(accountDto -> accountDto.getUserID() == transactionDto.getSender()).findFirst().orElse(null);
         AccountDto receiverAccount = accountsByIds.stream().filter(accountDto -> accountDto.getUserID() == transactionDto.getReceiver()).findFirst().orElse(null);
         logger.info("Fetching current rates and amount to be transferred from Exchange RAte API");
-        CurrencyExchanger exchangeRateAmountForPair = exchangeRateService.getExchangeRateAmountForPair
-                (senderAccount.getCurrency(), receiverAccount.getCurrency(), transactionDto.getAmount());
+        CurrencyExchanger exchangeRateAmountForPair = exchangeRateService.getExchangeRateAmountForPair(senderAccount.getCurrency(), receiverAccount.getCurrency(), transactionDto.getAmount());
         logger.info("Current Rates fetched:" + exchangeRateAmountForPair);
         for (AccountDto accountDto : accountsByIds) {
             if (transactionDto.getSender() == accountDto.getUserID()) {
@@ -136,22 +136,21 @@ public class TransactionServiceImpl implements TransactionService {
         logger.info("Fetching account details with account ID " + accountId);
         AccountDto accountById = null;
         if (accountService.findAccountById(accountId) != null) {
-            accountById = accountService.findAccountById(accountId);
-            accountById.setBalance(accountById.getBalance() + amount);
+            if (amount > 1) {
+                accountById = accountService.findAccountById(accountId);
+                accountById.setBalance(accountById.getBalance() + amount);
+            } else {
+                logger.error(amount + " invalid amount inserted by user");
+                throw new InvalidAmountException("Please provide a valid amount to initiate this transaction");
+            }
+
         } else {
             logger.error("account not found with account ID " + accountId);
             throw new AccountNotFoundException("Account not found");
         }
 
         if (accountService.updateAccount(accountById) != null) {
-            Transaction transaction = Transaction.builder().
-                    fromCurrency(accountById.getCurrency()).
-                    toCurrency(accountById.getCurrency()).
-                    status(TxStatus.COMPLETED).
-                    senderAccountId(accountId).
-                    amount(amount).
-                    typeOfTransaction(TypeOfTransaction.DEPOSIT).
-                    build();
+            Transaction transaction = Transaction.builder().fromCurrency(accountById.getCurrency()).toCurrency(accountById.getCurrency()).status(TxStatus.COMPLETED).senderAccountId(accountId).amount(amount).typeOfTransaction(TypeOfTransaction.DEPOSIT).build();
 
 
             savedTransaction = transactionRepository.save(transaction);
@@ -167,18 +166,20 @@ public class TransactionServiceImpl implements TransactionService {
         AccountDto accountById = accountService.findAccountById(accountId);
 
         if (accountById.getBalance() >= amount) {
-            accountById.setBalance(accountById.getBalance() - amount);
-            if (accountService.updateAccount(accountById) != null) {
-                Transaction transaction = Transaction.builder().
-                        fromCurrency(accountById.getCurrency()).
-                        toCurrency(accountById.getCurrency()).
-                        status(TxStatus.COMPLETED).
-                        senderAccountId(accountId).
-                        typeOfTransaction(TypeOfTransaction.WITHDRAWAL).
-                        amount(amount).
-                        build();
+            if (amount >= 1) {
+                accountById.setBalance(accountById.getBalance() - amount);
+                if (accountService.updateAccount(accountById) != null) {
+                    Transaction transaction = Transaction.builder().fromCurrency(accountById.getCurrency()).toCurrency(accountById.getCurrency()).status(TxStatus.COMPLETED).senderAccountId(accountId).typeOfTransaction(TypeOfTransaction.WITHDRAWAL).amount(amount).build();
 
-                savedTransaction = transactionRepository.save(transaction);
+                    savedTransaction = transactionRepository.save(transaction);
+
+                } else {
+                    logger.error("account not found with account ID " + accountId);
+                    throw new AccountNotFoundException("Account not found");
+                }
+            } else {
+                logger.error(amount + " invalid amount inserted by user");
+                throw new InvalidAmountException("Please provide a valid amount to initiate this transaction");
 
             }
         } else {
