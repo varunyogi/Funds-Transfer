@@ -38,7 +38,7 @@ public class AccountServiceImplTest {
 
         Account johnAccount = Account.builder().accountName("John").accountType(AccountType.CREDIT).balance(200).currency("EUR").build();
 
-        AccountDto accountDto = AccountDto.builder().userName("John").accountType(AccountType.CREDIT).balance(200).currency("CUR").build();
+        AccountDto accountDto = AccountDto.builder().userName("John").accountType(AccountType.CREDIT).balance(200).currency("USD").build();
 
         when(accountRepository.save(any(Account.class))).thenReturn(johnAccount);
 
