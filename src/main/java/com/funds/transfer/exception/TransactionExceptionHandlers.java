@@ -37,4 +37,13 @@ public class TransactionExceptionHandlers {
 
         return new ResponseEntity<>(apiException, apiException.getHttpStatus());
     }
+
+    @ExceptionHandler(InvalidAmountException.class)
+    public ResponseEntity<Object> invalidAmountException(InvalidAmountException e) {
+        APIException apiException = new APIException(
+                e.getMessage(), HttpStatus.BAD_REQUEST, ZonedDateTime.now(ZoneId.of("Z"))
+
+        );
+        return new ResponseEntity<>(apiException, apiException.getHttpStatus());
+    }
 }

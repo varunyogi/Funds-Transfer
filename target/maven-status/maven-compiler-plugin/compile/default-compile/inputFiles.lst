@@ -12,6 +12,7 @@
 /Users/varunkaushik/Downloads/transfer/Funds-Transfer/src/main/java/com/funds/transfer/exception/CurrencyNotSupportedException.java
 /Users/varunkaushik/Downloads/transfer/Funds-Transfer/src/main/java/com/funds/transfer/exception/GlobalExceptionHandlers.java
 /Users/varunkaushik/Downloads/transfer/Funds-Transfer/src/main/java/com/funds/transfer/exception/InsufficientAmountException.java
+/Users/varunkaushik/Downloads/transfer/Funds-Transfer/src/main/java/com/funds/transfer/exception/InvalidAmountException.java
 /Users/varunkaushik/Downloads/transfer/Funds-Transfer/src/main/java/com/funds/transfer/exception/TransactionExceptionHandlers.java
 /Users/varunkaushik/Downloads/transfer/Funds-Transfer/src/main/java/com/funds/transfer/exception/TransactionTypeNotSupportedException.java
 /Users/varunkaushik/Downloads/transfer/Funds-Transfer/src/main/java/com/funds/transfer/feign/CurrencyExchangeRate.java

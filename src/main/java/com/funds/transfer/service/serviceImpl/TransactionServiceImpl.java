@@ -4,6 +4,7 @@ import com.funds.transfer.entity.CurrencyExchanger;
 import com.funds.transfer.entity.Transaction;
 import com.funds.transfer.exception.AccountNotFoundException;
 import com.funds.transfer.exception.InsufficientAmountException;
+import com.funds.transfer.exception.InvalidAmountException;
 import com.funds.transfer.exception.TransactionTypeNotSupportedException;
 import com.funds.transfer.mapper.TransactionMapper;
 import com.funds.transfer.model.*;
@@ -56,25 +57,35 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionDto makeTransaction(TransactionDto transactionDto) {
         Transaction savedTransaction = null;
         if (accountService.isValidAccount(transactionDto.getReceiver()) && accountService.isValidAccount(transactionDto.getSender())) {
-            if (Double.valueOf(accountService.checkBalance(transactionDto.getSender()).get("balance")) > transactionDto.getAmount()) {
-                List<AccountDto> accountDtos = updateAccountForTransferTransaction(transactionDto);
-                transactionDto.setSenderCurrency(getCurrencyType(accountDtos, transactionDto, 'S'));
-                transactionDto.setReceiverCurrency(getCurrencyType(accountDtos, transactionDto, 'R'));
-                transactionDto.setTransactionStatus(TxStatus.COMPLETED);
-                logger.info("Transaction object created, under process");
-                savedTransaction = transactionRepository.save(TransactionMapper.mapToTransaction(transactionDto));
-                logger.info("Transaction completed with transaction: " + savedTransaction);
+            if (transactionDto.getAmount() > 1) {
 
+                if (Double.valueOf(accountService.checkBalance(transactionDto.getSender()).get("balance")) > transactionDto.getAmount()) {
+                    List<AccountDto> accountDtos = updateAccountForTransferTransaction(transactionDto);
+                    transactionDto.setSenderCurrency(getCurrencyType(accountDtos, transactionDto, 'S'));
+                    transactionDto.setReceiverCurrency(getCurrencyType(accountDtos, transactionDto, 'R'));
+                    transactionDto.setTransactionStatus(TxStatus.COMPLETED);
+                    logger.info("Transaction object created, under process");
+                    savedTransaction = transactionRepository.save(TransactionMapper.mapToTransaction(transactionDto));
+                    logger.info("Transaction completed with transaction: " + savedTransaction);
+
+
+                } else {
+                    logger.error("user " + transactionDto.getSender() + " don't have sufficient balance in the account");
+                    throw new InsufficientAmountException("Your account does not have enough balance to make this transaction");
+
+                }
             } else {
-                logger.error("user " + transactionDto.getSender() + " don't have sufficient balance in the account");
-                throw new InsufficientAmountException("Your account does not have enough balance to make this transaction");
+                logger.error(transactionDto.getAmount() + " invalid amount inserted by user");
+                throw new InvalidAmountException("Please provide a valid amount to initiate this transaction");
             }
         } else {
             logger.error("SENDER/RECEIVER ID provided is invalid, sender :" + transactionDto.getSender() + "receiver:" + transactionDto.getReceiver());
             throw new AccountNotFoundException("Please provide a valid SENDER/RECEIVER account ID");
         }
 
+
         return TransactionMapper.mapToTransactionDto(savedTransaction);
+
     }
 
     private String getCurrencyType(List<AccountDto> accountDtoList, TransactionDto transactionDto, char type) {

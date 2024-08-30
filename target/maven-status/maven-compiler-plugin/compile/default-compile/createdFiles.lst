@@ -30,6 +30,7 @@ com/funds/transfer/model/Currency.class
 com/funds/transfer/model/TransactionDto$TransactionDtoBuilder.class
 com/funds/transfer/model/TransactionDto.class
 com/funds/transfer/exception/GlobalExceptionHandlers.class
+com/funds/transfer/exception/InvalidAmountException.class
 com/funds/transfer/entity/Account.class
 com/funds/transfer/feign/CurrencyExchangeRate.class
 com/funds/transfer/service/AccountService.class
