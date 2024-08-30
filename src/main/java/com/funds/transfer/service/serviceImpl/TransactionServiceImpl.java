@@ -189,12 +189,5 @@ public class TransactionServiceImpl implements TransactionService {
         return TransactionMapper.mapToTransactionDto(savedTransaction);
     }
 
-    public boolean isValidCurrency(String currency) {
-        try {
-            Currency.valueOf(currency.toUpperCase());
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-    }
+
 }

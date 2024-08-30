@@ -3,9 +3,11 @@ package com.funds.transfer.service.serviceImpl;
 import com.funds.transfer.entity.Account;
 import com.funds.transfer.exception.AccountNotFoundException;
 import com.funds.transfer.exception.AccountTypeNotSupportedException;
+import com.funds.transfer.exception.CurrencyNotSupportedException;
 import com.funds.transfer.mapper.AccountMapper;
 import com.funds.transfer.model.AccountDto;
 import com.funds.transfer.model.AccountType;
+import com.funds.transfer.model.Currency;
 import com.funds.transfer.repository.AccountRepository;
 import com.funds.transfer.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +34,12 @@ public class AccountServiceImpl implements AccountService {
         Account savedAccount = null;
         try {
             if (accountDto.getAccountType().equals(AccountType.CREDIT) || accountDto.getAccountType().equals(AccountType.DEBIT)) {
-                savedAccount = accountRepository.save(AccountMapper.mapToAccount(accountDto));
+                if (isValidCurrency(accountDto.getCurrency())) {
+                    savedAccount = accountRepository.save(AccountMapper.mapToAccount(accountDto));
+                } else {
+                    throw new CurrencyNotSupportedException("Currency " + accountDto.getCurrency() + " is not supported by our platform, please provide a valid currency");
+                }
+
 
             }
         } catch (IllegalArgumentException e) {
@@ -86,5 +93,14 @@ public class AccountServiceImpl implements AccountService {
     public List<AccountDto> getAccountsByIds(List<Integer> accountIds) {
         return accountRepository.findByIdIn(accountIds).stream().map(AccountMapper::mapToAccountDto).toList();
 
+    }
+
+    public boolean isValidCurrency(String currency) {
+        try {
+            Currency.valueOf(currency.toUpperCase());
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 }
